@@ -1,12 +1,12 @@
-import sqlite3
 import requests
+import os
+import psycopg2
 
-DATABASE_FILE = 'games.db'
+DATABASE_URL = os.environ['DATABASE_URL']
 CHEAPSHARK_API_URL = 'https://www.cheapshark.com/api/1.0/deals?storeID=1&upperPrice=15'
 
-
 def create_database():
-    conn = sqlite3.connect(DATABASE_FILE)
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS games (
                  title TEXT,
@@ -38,7 +38,7 @@ def fetch_deals_from_api():
 def insert_data_from_api():
     data = fetch_deals_from_api()
     if isinstance(data, list):
-        conn = sqlite3.connect(DATABASE_FILE)
+        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         c = conn.cursor()
         for entry in data:
             if isinstance(entry, dict):  # Ensure entry is a dictionary

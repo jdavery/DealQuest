@@ -6,15 +6,16 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
+import os
+import psycopg2
+
+DATABASE_URL = os.environ['DATABASE_URL']
 
 app = Flask(__name__)
 
-app.config["DATABASE_FILE"] = "app/games.db"
-app.secret_key = 'your_secret_key'
-
 # Function to fetch database fields from SQLite database
 def get_database_fields():
-    conn = sqlite3.connect(app.config["DATABASE_FILE"])
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
     cursor.execute("PRAGMA table_info(games)")
     columns = cursor.fetchall()
