@@ -1,0 +1,29 @@
+# Define the stages of the pipeline
+stages:
+  - build
+  - test
+
+# Define job for building the application
+build:
+  stage: build
+  image: python:3.12  # Use Python 3.12 image
+  before_script:
+    - pip install -r requirements.txt  # Install dependencies
+  script:
+    - python setup.py build  # Build the application
+  artifacts:
+    paths:
+      - build/  # Define artifacts to be stored
+
+# Define job for running tests
+test:
+  stage: test
+  image: python:3.12  # Use Python 3.12 image
+  before_script:
+    - pip install -r requirements.txt  # Install dependencies
+  script:
+    - python -m unittest discover -s test/  # Run tests from the test directory
+  artifacts:
+    when: always
+    paths:
+      - test-reports/  # Define artifacts to be stored

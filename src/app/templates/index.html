@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DealQuest - Find Epic Deals on PC Games</title>
+    <script>
+        function clearCustomSearch() {
+            var inputFields = document.querySelectorAll('.custom-search-input'); // Select all input fields in the custom search form
+            inputFields.forEach(function(input) {
+                input.value = ''; // Clear the value of each input field
+            });
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+        .search-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .search-row label {
+            width: 30%;
+        }
+
+        .search-row input {
+            width: 65%;
+            margin-left: 5%;
+        }
+        .button-row {
+            margin-top: 10px;
+        }
+        .quick-search-button {
+            background-color: #4CAF50; /* Green background */
+            border: none; /* Remove border */
+            color: white; /* White text */
+            padding: 15px 32px; /* Padding */
+            text-align: center; /* Center text */
+            text-decoration: none; /* Remove underline */
+            display: inline-block; /* Make the element a block element */
+            font-size: 16px; /* Increase font size */
+            margin: 4px 2px; /* Margin */
+            cursor: pointer; /* Add cursor pointer */
+            border-radius: 8px; /* Rounded corners */
+        }
+
+        .quick-search-button:hover {
+            background-color: #45a049; /* Darker green background on hover */
+        }
+
+        .custom-search-button {
+            background-color: #008CBA; /* Blue background */
+            border: none; /* Remove border */
+            color: white; /* White text */
+            padding: 15px 32px; /* Padding */
+            text-align: center; /* Center text */
+            text-decoration: none; /* Remove underline */
+            display: inline-block; /* Make the element a block element */
+            font-size: 16px; /* Increase font size */
+            margin: 4px 2px; /* Margin */
+            cursor: pointer; /* Add cursor pointer */
+            border-radius: 8px; /* Rounded corners */
+        }
+
+        .custom-search-button:hover {
+            background-color: #0077A7; /* Darker blue background on hover */
+        }
+
+        .clear-button {
+        background-color: #ff3333; /* Red background */
+        border: none; /* Remove border */
+        color: white; /* White text */
+        padding: 15px 32px; /* Padding */
+        text-align: center; /* Center text */
+        text-decoration: none; /* Remove underline */
+        display: inline-block; /* Make the element a block element */
+        font-size: 16px; /* Increase font size */
+        margin: 4px 2px; /* Margin */
+        cursor: pointer; /* Add cursor pointer */
+        border-radius: 8px; /* Rounded corners */
+        }
+
+        .clear-button:hover {
+            background-color: #ff6666; /* Darker red background on hover */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to DealQuest</h1>
+        <p>Find Epic Deals on PC Games using CheapShark. This application returns a summary on the search criteria
+            as well as a correlation matrix between prices and critic scores.</p>
+    </div>
+
+    <h2>Quick Search Options</h2>
+    <div>
+        <p>Click one of the buttons below for quick search options. Very Positive or Overwhelmingly Positive
+            use Steam's ratings for games. The other quick search option is for games on sale for less than 10 USD. All
+            prices are in USD.
+        </p>
+        <form action="/" method="POST">
+            <button type="submit" name="quick_search" value="very_positive" class="quick-search-button">Very Positive or Better</button>
+            <button type="submit" name="quick_search" value="under_10" class="quick-search-button">Under $10</button>
+        </form>
+    </div>
+
+<!-- Custom search option -->
+    <h2>Custom Search</h2>
+    <p>Use the form below to perform a custom search instead. You may use "><=" operators in numeric fields.</p>
+    <form action="/" method="POST">
+        {% for field in database_fields %}
+        <div class="search-row"></div>
+            <label for="{{ field }}">{{ field }}</label>
+            <input type="text" name="{{ field }}" id="{{ field }}" class="custom-search-input"
+                   placeholder="Enter {{ field }}...">
+        </div>
+        {% endfor %}
+        <div class="button-row">
+        <button type="submit" class="custom-search-button">Search</button>
+        <button type="button" onclick="clearCustomSearch()" class="clear-button">Clear</button>
+        </div>
+    </form>
+</body>
+</html>

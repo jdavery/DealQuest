@@ -23,10 +23,9 @@ To get started with DealQuest, follow these steps:
 ```bash
    pip install -r requirements.txt
 ```
-
 ## Usage
 Once you've installed the dependencies, you can run the DealQuest application:
-1. Set the environment variable to point to the Flask app:
+1. Set the environment variable to point to the Flask app. Make sure you navigated to /src. :
 ```bash
   set FLASK_APP=src/app/__init__.py
 ```

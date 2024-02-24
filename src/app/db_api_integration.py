@@ -9,23 +9,15 @@ def create_database():
     conn = sqlite3.connect(DATABASE_FILE)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS games (
-                 internalName TEXT PRIMARY KEY,
                  title TEXT,
-                 metacriticLink TEXT,
-                 dealID TEXT,
-                 storeID TEXT,
-                 gameID TEXT,
                  salePrice REAL,
                  normalPrice REAL,
-                 isOnSale INTEGER,
                  savings REAL,
                  metacriticScore INTEGER,
                  steamRatingText TEXT,
                  steamRatingPercent INTEGER,
                  steamRatingCount INTEGER,
                  steamAppID TEXT,
-                 releaseDate INTEGER,
-                 lastChange INTEGER,
                  dealRating REAL,
                  thumb TEXT)''')
     conn.commit()
@@ -51,27 +43,19 @@ def insert_data_from_api():
         for entry in data:
             if isinstance(entry, dict):  # Ensure entry is a dictionary
                 game_data = (
-                    entry.get('internalName', ''),
                     entry.get('title', ''),
-                    entry.get('metacriticLink', ''),
-                    entry.get('dealID', ''),
-                    entry.get('storeID', ''),
-                    entry.get('gameID', ''),
                     float(entry.get('salePrice', 0)),
                     float(entry.get('normalPrice', 0)),
-                    int(entry.get('isOnSale', 0)),
                     float(entry.get('savings', 0)),
                     int(entry.get('metacriticScore', 0)),
                     entry.get('steamRatingText', ''),
                     int(entry.get('steamRatingPercent', 0)),
                     int(entry.get('steamRatingCount', 0)),
                     entry.get('steamAppID', ''),
-                    int(entry.get('releaseDate', 0)),
-                    int(entry.get('lastChange', 0)),
                     float(entry.get('dealRating', 0)),
                     entry.get('thumb', '')
                 )
-                c.execute('''INSERT OR REPLACE INTO games VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', game_data)
+                c.execute('''INSERT OR REPLACE INTO games VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', game_data)
             else:
                 print("Invalid entry found in the data:", entry)
         conn.commit()

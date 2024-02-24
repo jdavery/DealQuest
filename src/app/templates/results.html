@@ -1,0 +1,70 @@
+<!-- search_results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results Page</title>
+     <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        img {
+            width: 100%; /* Ensure image fills the container */
+            height: auto; /* Maintain aspect ratio */
+            max-width: 700px; /* Set maximum width */
+            max-height: 500px; /* Set maximum height */
+        }
+    </style>
+</head>
+<body>
+    <!-- Button to return to index page -->
+    <a href="/">Return to Home</a>
+    <h1>Search Results for: {{ search_criteria }}</h1>
+    {% if results.empty %}
+        <p>No results found.</p>
+    {% else %}
+         <!-- Summary Table -->
+        <h2>Summary Statistics</h2>
+        {{ summary_stats.to_html()|safe }}
+        <!-- Correlation Matrix -->
+        <h2>Correlation Matrix</h2>
+        <img src="data:image/png;base64,{{ correlation_matrix_plot }}" alt="Correlation Matrix">
+        <!-- Display DataFrame as table -->
+        <h2>Results Table</h2>
+        <table>
+            <thead>
+                <tr>
+                    {% for column in results.columns %}
+                        <th>{{ column }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for index, row in results.iterrows() %}
+                    <tr>
+                        {% for value in row %}
+                            <td>
+                                {% if loop.index0 == loop.length - 1 and 'thumb' in results.columns %}
+                                    <img src="{{ value }}" alt="Thumbnail">
+                                {% else %}
+                                    {{ value }}
+                                {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+</html>
