@@ -1,27 +1,35 @@
-import sqlite3
-import re
+import os
+import psycopg2
 from flask import Flask, request, render_template, redirect, url_for, session
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
-import os
-import psycopg2
+import re
 
 DATABASE_URL = os.environ['DATABASE_URL']
 
 app = Flask(__name__)
 
-# Function to fetch database fields from SQLite database
+# Function to fetch database fields from PostgreSQL database
 def get_database_fields():
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
-    cursor.execute("PRAGMA table_info(games)")
+    cursor.execute("""
+        SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_name = 'games'
+    """)
     columns = cursor.fetchall()
-    database_fields = [column[1] for column in columns]
-    # users don't need to search by the thumbnail url
+
+    # Extract column names from the result
+    database_fields = [column[0] for column in columns]
+
+    # Remove 'thumb' column if present
     database_fields = [field for field in database_fields if field != 'thumb']
+
+    # Close the connection
     conn.close()
     return database_fields
 
@@ -90,7 +98,7 @@ def perform_search(search_criteria):
     if not search_criteria:
         return pd.DataFrame()  # No criteria provided, return empty DataFrame
 
-    conn = sqlite3.connect(app.config["DATABASE_FILE"])
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     cursor = conn.cursor()
 
     query = "SELECT * FROM games WHERE "
@@ -98,13 +106,13 @@ def perform_search(search_criteria):
 
     for field, value in search_criteria.items():
         if isinstance(value, list):
-            conditions.append(f"{field} IN ({', '.join(['?'] * len(value))})")
+            conditions.append(f"{field} IN ({', '.join(['%s'] * len(value))})")
         elif isinstance(value, str) and any(op in value for op in ['<', '>', '=']):
             operator, numeric_value = re.findall(r'([<>=]+)\s*([\d.]+)', value)[0]  # Extract operator and numeric value
-            conditions.append(f"{field} {operator} ?")
+            conditions.append(f"{field} {operator} %s")
             search_criteria[field] = numeric_value.strip()  # Update value in search_criteria
         else:
-            conditions.append(f"{field} = ?")
+            conditions.append(f"{field} = %s")
     query += " AND ".join(conditions)
 
     # Construct the list of values to be passed to the execute function
@@ -125,3 +133,6 @@ def perform_search(search_criteria):
     print("Values:", flattened_values)
 
     return results_df
+
+if __name__ == '__main__':
+    app.run(debug=True)
