@@ -131,15 +131,15 @@
     <p>Use the form below to perform a custom search instead. You may use "><=" operators in numeric fields.</p>
     <form action="/" method="POST">
         {% for field in database_fields %}
-        <div class="search-row"></div>
+        <div class="search-row">
             <label for="{{ field }}">{{ field }}</label>
             <input type="text" name="{{ field }}" id="{{ field }}" class="custom-search-input"
-                   placeholder="Enter {{ field }}...">
+                   placeholder="Enter {{ field }}..." value="{{ search_criteria.get(field, '') }}">
         </div>
         {% endfor %}
         <div class="button-row">
-        <button type="submit" class="custom-search-button">Search</button>
-        <button type="button" onclick="clearCustomSearch()" class="clear-button">Clear</button>
+            <button type="submit" class="custom-search-button">Search</button>
+            <button type="button" onclick="clearCustomSearch()" class="clear-button">Clear</button>
         </div>
     </form>
 </body>

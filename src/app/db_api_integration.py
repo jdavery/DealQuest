@@ -1,5 +1,5 @@
-import requests
 import os
+import requests
 import psycopg2
 
 DATABASE_URL = os.environ['DATABASE_URL']
@@ -8,7 +8,11 @@ CHEAPSHARK_API_URL = 'https://www.cheapshark.com/api/1.0/deals?storeID=1&upperPr
 def create_database():
     conn = psycopg2.connect(DATABASE_URL, sslmode='require')
     c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS games (
+    # Delete the existing 'games' table if it exists
+    c.execute('DROP TABLE IF EXISTS games')
+    # Create a new 'games' table
+    c.execute('''CREATE TABLE games (
+                 id SERIAL PRIMARY KEY,
                  title TEXT,
                  salePrice REAL,
                  normalPrice REAL,
@@ -23,17 +27,13 @@ def create_database():
     conn.commit()
     conn.close()
 
-
 def fetch_deals_from_api():
-    payload = {}
-    headers = {}
-    response = requests.request("GET", CHEAPSHARK_API_URL, headers=headers, data=payload)
+    response = requests.get(CHEAPSHARK_API_URL)
     if response.status_code == 200:
         return response.json()
     else:
         print("Failed to fetch deals from the API.")
         return []
-
 
 def insert_data_from_api():
     data = fetch_deals_from_api()
@@ -41,7 +41,7 @@ def insert_data_from_api():
         conn = psycopg2.connect(DATABASE_URL, sslmode='require')
         c = conn.cursor()
         for entry in data:
-            if isinstance(entry, dict):  # Ensure entry is a dictionary
+            if isinstance(entry, dict):
                 game_data = (
                     entry.get('title', ''),
                     float(entry.get('salePrice', 0)),
@@ -57,19 +57,8 @@ def insert_data_from_api():
                 )
                 c.execute('''
                         INSERT INTO games 
+                        (title, salePrice, normalPrice, savings, metacriticScore, steamRatingText, steamRatingPercent, steamRatingCount, steamAppID, dealRating, thumb)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                        ON CONFLICT (title) DO UPDATE 
-                        SET 
-                            salePrice = excluded.salePrice,
-                            normalPrice = excluded.normalPrice,
-                            savings = excluded.savings,
-                            metacriticScore = excluded.metacriticScore,
-                            steamRatingText = excluded.steamRatingText,
-                            steamRatingPercent = excluded.steamRatingPercent,
-                            steamRatingCount = excluded.steamRatingCount,
-                            steamAppID = excluded.steamAppID,
-                            dealRating = excluded.dealRating,
-                            thumb = excluded.thumb
                     ''', game_data)
             else:
                 print("Invalid entry found in the data:", entry)
@@ -77,7 +66,6 @@ def insert_data_from_api():
         conn.close()
     else:
         print("No valid data fetched from the API.")
-
 
 def main():
     create_database()

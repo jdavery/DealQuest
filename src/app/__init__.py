@@ -7,12 +7,15 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 import re
+from datetime import timedelta
 
 DATABASE_URL = os.environ['DATABASE_URL']
 
-
 app = Flask(__name__)
+# Use heroku SECRET_KEY
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
+# Set the permanent session lifetime to 10 minutes
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
 # Function to fetch database fields from PostgreSQL database
 def get_database_fields():
@@ -53,8 +56,14 @@ def index():
             # Perform custom search
             session['search_criteria'] = {field: request.form.get(field) for field in database_fields if request.form.get(field)}
             return redirect(url_for("results"))
+    else:
+        # Check if there are stored search criteria and populate the form
+        if 'search_criteria' in session:
+            search_criteria = session['search_criteria']
+        else:
+            search_criteria = {}  # Empty dictionary if no search criteria in session
 
-    return render_template("index.html", database_fields=database_fields)
+    return render_template("index.html", database_fields=database_fields, search_criteria=search_criteria)
 
 
 # Define a route for the search results page
