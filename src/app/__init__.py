@@ -82,8 +82,8 @@ def results():
         # Perform data analysis and computations
         # Compute summary statistics
         summary_stats = results_df.describe()
-        df_numeric = results_df[['salePrice', 'normalPrice', 'metacriticScore', 'steamRatingPercent',
-                                'steamRatingCount', 'dealRating']].copy()
+        df_numeric = results_df[['saleprice', 'normalprice', 'metacriticscore', 'steamratingpercent',
+                                'steamratingcount', 'dealrating']].copy()
         # Compute correlation matrix
         correlation_matrix = df_numeric.corr()
 
