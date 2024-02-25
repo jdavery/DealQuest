@@ -55,7 +55,22 @@ def insert_data_from_api():
                     float(entry.get('dealRating', 0)),
                     entry.get('thumb', '')
                 )
-                c.execute('''INSERT OR REPLACE INTO games VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', game_data)
+                c.execute('''
+                        INSERT INTO games 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT (title) DO UPDATE 
+                        SET 
+                            salePrice = excluded.salePrice,
+                            normalPrice = excluded.normalPrice,
+                            savings = excluded.savings,
+                            metacriticScore = excluded.metacriticScore,
+                            steamRatingText = excluded.steamRatingText,
+                            steamRatingPercent = excluded.steamRatingPercent,
+                            steamRatingCount = excluded.steamRatingCount,
+                            steamAppID = excluded.steamAppID,
+                            dealRating = excluded.dealRating,
+                            thumb = excluded.thumb
+                    ''', game_data)
             else:
                 print("Invalid entry found in the data:", entry)
         conn.commit()
