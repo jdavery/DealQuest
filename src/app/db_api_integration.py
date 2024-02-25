@@ -14,15 +14,15 @@ def create_database():
     c.execute('''CREATE TABLE games (
                  id SERIAL PRIMARY KEY,
                  title TEXT,
-                 salePrice REAL,
-                 normalPrice REAL,
+                 saleprice REAL,
+                 normalprice REAL,
                  savings REAL,
-                 metacriticScore INTEGER,
-                 steamRatingText TEXT,
-                 steamRatingPercent INTEGER,
-                 steamRatingCount INTEGER,
-                 steamAppID TEXT,
-                 dealRating REAL,
+                 metacriticscore INTEGER,
+                 steamratingtext TEXT,
+                 steamratingpercent INTEGER,
+                 steamratingcount INTEGER,
+                 steamappid TEXT,
+                 dealrating REAL,
                  thumb TEXT)''')
     conn.commit()
     conn.close()
@@ -44,20 +44,21 @@ def insert_data_from_api():
             if isinstance(entry, dict):
                 game_data = (
                     entry.get('title', ''),
-                    float(entry.get('salePrice', 0)),
-                    float(entry.get('normalPrice', 0)),
+                    float(entry.get('saleprice', 0)),
+                    float(entry.get('normalprice', 0)),
                     float(entry.get('savings', 0)),
-                    int(entry.get('metacriticScore', 0)),
-                    entry.get('steamRatingText', ''),
-                    int(entry.get('steamRatingPercent', 0)),
-                    int(entry.get('steamRatingCount', 0)),
-                    entry.get('steamAppID', ''),
-                    float(entry.get('dealRating', 0)),
+                    int(entry.get('metacriticscore', 0)),
+                    entry.get('steamratingtext', ''),
+                    int(entry.get('steamratingpercent', 0)),
+                    int(entry.get('steamratingcount', 0)),
+                    entry.get('steamappid', ''),
+                    float(entry.get('dealrating', 0)),
                     entry.get('thumb', '')
                 )
                 c.execute('''
                         INSERT INTO games 
-                        (title, salePrice, normalPrice, savings, metacriticScore, steamRatingText, steamRatingPercent, steamRatingCount, steamAppID, dealRating, thumb)
+                        (title, saleprice, normalprice, savings, metacriticscore, steamratingtext, steamratingpercent, 
+                        steamratingcount, steamappid, dealrating, thumb)
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ''', game_data)
             else:

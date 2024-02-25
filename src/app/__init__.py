@@ -33,6 +33,8 @@ def get_database_fields():
 
     # Remove 'thumb' column if present
     database_fields = [field for field in database_fields if field != 'thumb']
+    # Remove 'id' column if present
+    database_fields = [field for field in database_fields if field != 'id']
 
     # Close the connection
     conn.close()
@@ -46,11 +48,11 @@ def index():
     if request.method == "POST":
         if request.form.get("quick_search") == "very_positive":
             # Perform quick search for "Very Positive or Better"
-            session['search_criteria'] = {"steamRatingText": ["Very Positive", "Overwhelmingly Positive"]}
+            session['search_criteria'] = {"steamratingtext": ["Very Positive", "Overwhelmingly Positive"]}
             return redirect(url_for("results"))
         elif request.form.get("quick_search") == "under_10":
             # Perform quick search for "Under $10"
-            session['search_criteria'] = {"salePrice": "< 10"}
+            session['search_criteria'] = {"saleprice": "< 10"}
             return redirect(url_for("results"))
         else:
             # Perform custom search
@@ -122,6 +124,9 @@ def perform_search(search_criteria):
             operator, numeric_value = re.findall(r'([<>=]+)\s*([\d.]+)', value)[0]  # Extract operator and numeric value
             conditions.append(f"{field} {operator} %s")
             search_criteria[field] = numeric_value.strip()  # Update value in search_criteria
+        elif field in ['title', 'steamratingtext']:
+            conditions.append(f"{field} ILIKE %s")
+            search_criteria[field] = f"%{value}%"  # Add wildcard to value for LIKE comparison
         else:
             conditions.append(f"{field} = %s")
     query += " AND ".join(conditions)
@@ -139,9 +144,6 @@ def perform_search(search_criteria):
     results_df = pd.DataFrame(rows, columns=columns)
 
     conn.close()
-
-    print("Generated SQL Query:", query)
-    print("Values:", flattened_values)
 
     return results_df
 
