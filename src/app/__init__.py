@@ -10,7 +10,9 @@ import re
 
 DATABASE_URL = os.environ['DATABASE_URL']
 
+
 app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
 
 # Function to fetch database fields from PostgreSQL database
 def get_database_fields():

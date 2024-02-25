@@ -69,6 +69,5 @@ def main():
     insert_data_from_api()
     print("Data inserted into the database successfully.")
 
-
 if __name__ == "__main__":
     main()
