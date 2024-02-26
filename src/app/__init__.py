@@ -60,9 +60,9 @@ def index():
             return redirect(url_for("results"))
     else:
         # Check if there are stored search criteria and populate the form
+        print(session)
         if 'search_criteria' in session:
             search_criteria = session['search_criteria']
-            print(search_criteria)
         else:
             search_criteria = {}  # Empty dictionary if no search criteria in session
 
@@ -73,7 +73,8 @@ def index():
 @app.route("/results")
 def results():
     # Retrieve search criteria from session
-    search_criteria = session.pop('search_criteria', None)
+    print(session)
+    search_criteria = session.get('search_criteria', None)
 
     # Perform the search operation based on the specified criteria
     results_df = perform_search(search_criteria)
