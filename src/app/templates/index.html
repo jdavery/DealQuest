@@ -11,6 +11,38 @@
                 input.value = ''; // Clear the value of each input field
             });
         }
+        function validateForm() {
+            var inputs = document.getElementsByTagName("input");
+            for (var i = 0; i < inputs.length; i++) {
+                if (inputs[i].type === "text") {
+                    var fieldName = inputs[i].name;
+                    var fieldValue = inputs[i].value.trim();
+                    // Check if field value is not empty
+                    if (fieldValue !== "") {
+                        // Check if field value exceeds 300 characters
+                        if (fieldValue.length > 300) {
+                            alert(fieldName + " should be 300 characters or less.");
+                            return false; // Prevent form submission
+                        }
+                        // Check if field value for specific fields contains comparison operators or numerals
+                        if (["saleprice", "normalprice", "dealrating"].includes(fieldName)) {
+                            if (!/^([<>=]?\s*\d+(\.\d+)?)$/.test(fieldValue)) {
+                                alert(fieldName + " should contain comparison operators or numerals.");
+                                return false; // Prevent form submission
+                            }
+                        }
+                        if (["metacriticscore", "steamratingcount", "steamratingpercent"].includes(fieldName)) {
+                            if (!/^([<>=]*\s*\d+\s*)$/.test(fieldValue)) {
+                                alert(fieldName + " should contain integers.");
+                                return false; // Prevent form submission
+                            }
+                        }
+                    }
+                }
+            }
+            // If all validations pass, return true to allow form submission
+            return true;
+        }
     </script>
     <style>
         body {
@@ -130,7 +162,7 @@
 <!-- Custom search option -->
     <h2>Custom Search</h2>
     <p>Use the form below to perform a custom search instead. You may use "><=" operators in numeric fields.</p>
-    <form action="/" method="POST">
+    <form action="/" method="POST" onsubmit="return validateForm()">
         {% for field in database_fields %}
         <div class="search-row">
             <label for="{{ field }}">{{ field }}</label>

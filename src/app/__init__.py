@@ -55,26 +55,36 @@ def index():
             session['search_criteria'] = {"saleprice": "< 10"}
             return redirect(url_for("results"))
         else:
-            # Perform custom search
-            session['search_criteria'] = {field: request.form.get(field) for field in database_fields if request.form.get(field)}
+            search_criteria = {field: request.form.get(field).strip() for field in database_fields if
+                               request.form.get(field)}
+            session['search_criteria'] = search_criteria
             return redirect(url_for("results"))
     else:
         # Check if there are stored search criteria and populate the form
-        print(session)
         if 'search_criteria' in session:
             search_criteria = session['search_criteria']
+
         else:
             search_criteria = {}  # Empty dictionary if no search criteria in session
 
     return render_template("index.html", database_fields=database_fields, search_criteria=search_criteria)
 
-
 # Define a route for the search results page
 @app.route("/results")
 def results():
     # Retrieve search criteria from session
-    print(session)
-    search_criteria = session.get('search_criteria', None)
+    session_search_criteria = session.get('search_criteria', {})
+
+    # Preprocess the session data to convert string representations of lists to actual lists
+    search_criteria = {}
+    for field, value in session_search_criteria.items():
+        if isinstance(value, str) and value.startswith("[") and value.endswith("]"):
+            try:
+                # Attempt to evaluate the string as a list
+                value = eval(value)
+            except SyntaxError:
+                pass  # Ignore if evaluation fails
+        search_criteria[field] = value
 
     # Perform the search operation based on the specified criteria
     results_df = perform_search(search_criteria)
@@ -110,34 +120,39 @@ def results():
 
 # Function to perform the search operation
 def perform_search(search_criteria):
-    if not search_criteria:
-        return pd.DataFrame()  # No criteria provided, return empty DataFrame
-
     conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
 
-    query = "SELECT * FROM games WHERE "
-    conditions = []
+    if not search_criteria:
+        cursor.execute("SELECT * FROM games")
+    else:
+        query = "SELECT * FROM games WHERE "
+        conditions = []
+        flattened_values = []
 
-    for field, value in search_criteria.items():
-        if isinstance(value, list):
-            conditions.append(f"{field} IN ({', '.join(['%s'] * len(value))})")
-        elif isinstance(value, str) and any(op in value for op in ['<', '>', '=']):
-            operator, numeric_value = re.findall(r'([<>=]+)\s*([\d.]+)', value)[0]  # Extract operator and numeric value
-            conditions.append(f"{field} {operator} %s")
-            search_criteria[field] = numeric_value.strip()  # Update value in search_criteria
-        elif field in ['title', 'steamratingtext']:
-            conditions.append(f"{field} ILIKE %s")
-            search_criteria[field] = f"%{value}%"  # Add wildcard to value for LIKE comparison
-        else:
-            conditions.append(f"{field} = %s")
-    query += " AND ".join(conditions)
+        for field, value in search_criteria.items():
+            if isinstance(value, list):
+                # Treat as a list
+                print('its a list')
+                conditions.append(f"{field} IN ({', '.join(['%s'] * len(value))})")
+                flattened_values.extend(value)
+            elif isinstance(value, str) and any(op in value for op in ['<', '>', '=']):
+                # Handle numeric comparisons
+                operator, numeric_value = re.findall(r'([<>=]+)\s*([\d.]+)', value)[0]
+                conditions.append(f"{field} {operator} %s")
+                flattened_values.append(numeric_value.strip())
+            elif field in ['title', 'steamratingtext']:
+                # Handle text comparisons
+                conditions.append(f"{field} ILIKE %s")
+                flattened_values.append(f"%{value}%")
+            else:
+                # Treat as single value
+                conditions.append(f"{field} = %s")
+                flattened_values.append(value)
 
-    # Construct the list of values to be passed to the execute function
-    values = [value if isinstance(value, list) else [value] for value in search_criteria.values()]
-    flattened_values = [val for sublist in values for val in sublist]
+        query += " AND ".join(conditions)
 
-    cursor.execute(query, flattened_values)
+        cursor.execute(query, flattened_values)
 
     rows = cursor.fetchall()
     columns = [description[0] for description in cursor.description]
