@@ -90,7 +90,7 @@ def results():
     results_df = perform_search(search_criteria)
 
     if results_df.empty:
-        summary_stats = "No data available"
+        summary_stats = "No games on sale match the search criteria."
         correlation_matrix_plot = ""
     else:
         # Perform data analysis and computations
