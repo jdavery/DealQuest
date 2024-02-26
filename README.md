@@ -37,7 +37,7 @@ Once you've installed the dependencies, you can run the DealQuest application:
 
 ## Features:
 * **Game Deals**: Browse and discover the latest deals on PC games from various online stores.
-* **Search Functionality**: Easily search for specific games or genres to find the best deals.
+* **Search Functionality**: Easily search for specific games or review values to find the best deals.
 * **Deal Analysis**: Review some basic statistical analysis on the deals currently available.
 
 ## Endpoints:

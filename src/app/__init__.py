@@ -19,7 +19,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=10)
 
 # Function to fetch database fields from PostgreSQL database
 def get_database_fields():
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     cursor.execute("""
         SELECT column_name 
@@ -62,6 +62,7 @@ def index():
         # Check if there are stored search criteria and populate the form
         if 'search_criteria' in session:
             search_criteria = session['search_criteria']
+            print(search_criteria)
         else:
             search_criteria = {}  # Empty dictionary if no search criteria in session
 
@@ -111,7 +112,7 @@ def perform_search(search_criteria):
     if not search_criteria:
         return pd.DataFrame()  # No criteria provided, return empty DataFrame
 
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
 
     query = "SELECT * FROM games WHERE "

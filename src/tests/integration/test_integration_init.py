@@ -10,7 +10,7 @@ def test_create_database():
     create_database()
 
     # Connect to the database and verify that the table exists
-    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    conn = psycopg2.connect(DATABASE_URL)
     cursor = conn.cursor()
     cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'games')")
     assert cursor.fetchone()[0] == True
